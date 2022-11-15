@@ -256,8 +256,8 @@ void SaveEmulatorState(std::string path)
 	// memory
 	memory_Serialize(writer);
 	// gpu
-	writer.writeData(LatteGPUState.contextRegister, 65536);
-	writer.writeData(LatteGPUState.contextRegisterShadowAddr, 65536);
+	writer.writeData(LatteGPUState.contextRegister, sizeof(LatteGPUState.contextRegister));
+	writer.writeData(LatteGPUState.contextRegisterShadowAddr, sizeof(LatteGPUState.contextRegister));
 	writer.writeData(LatteGPUState.sharedArea, sizeof(gx2GPUSharedArea_t));
 	// cpu
 	auto threads = coreinit::GetAllThreads();
@@ -289,8 +289,8 @@ void LoadEmulatorState(std::string path)
 	// memory
 	memory_Deserialize(reader);
 	// gpu
-	reader.readData(LatteGPUState.contextRegister, 65536);
-	reader.readData(LatteGPUState.contextRegisterShadowAddr, 65536);
+	reader.readData(LatteGPUState.contextRegister, sizeof(LatteGPUState.contextRegister));
+	reader.readData(LatteGPUState.contextRegisterShadowAddr, sizeof(LatteGPUState.contextRegister));
 	reader.readData(LatteGPUState.sharedArea, sizeof(gx2GPUSharedArea_t));
 	// cpu
 	auto threads = coreinit::GetAllThreads();
