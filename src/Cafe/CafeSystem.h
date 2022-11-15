@@ -29,6 +29,9 @@ namespace CafeSystem
 
 	void ShutdownTitle();
 
+	void PauseTitle();
+	void ResumeTitle();
+
 	std::string GetMlcStoragePath(TitleId titleId);
 	void MlcStorageMountAllTitles();
 

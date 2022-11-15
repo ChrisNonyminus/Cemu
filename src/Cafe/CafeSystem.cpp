@@ -778,6 +778,30 @@ namespace CafeSystem
 		sSystemRunning = false;
 	}
 
+	void PauseTitle()
+	{
+		if (!sSystemRunning)
+			return;
+		//coreinit::OSSchedulerEnd();
+		coreinit::SuspendAllThreads();
+		//Latte_Stop();
+		sSystemRunning = false;
+	}
+
+	void ResumeTitle()
+	{
+		if (sSystemRunning)
+			return;
+		// enter scheduler
+		/*if (ActiveSettings::GetCPUMode() == CPUMode::MulticoreRecompiler)
+			coreinit::OSSchedulerBegin(3);
+		else
+			coreinit::OSSchedulerBegin(1);*/
+		coreinit::ResumeAllThreads();
+		//Latte_Start();
+		sSystemRunning = true;
+	}
+
 	/* Virtual mlc storage */
 
 	void InitVirtualMlcStorage()

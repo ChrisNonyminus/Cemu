@@ -247,6 +247,73 @@ void unitTests()
 	CRCTest();
 }
 
+#include "Cafe/CafeSystem.h"
+void LoadEmulatorState(std::string path);
+void SaveEmulatorState(std::string path)
+{
+	CafeSystem::PauseTitle();
+	MemStreamWriter writer(0);
+	// memory
+	memory_Serialize(writer);
+	// gpu
+	writer.writeData(LatteGPUState.contextRegister, 65536);
+	writer.writeData(LatteGPUState.contextRegisterShadowAddr, 65536);
+	writer.writeData(LatteGPUState.sharedArea, sizeof(gx2GPUSharedArea_t));
+	// cpu
+	auto threads = coreinit::GetAllThreads();
+	for (auto& thr : threads)
+	{
+		writer.writeBE<bool>(thr != nullptr);
+		if (thr != nullptr)
+			writer.writeData(thr, sizeof(OSThread_t));
+	}
+	for (auto& thr : activeThread)
+	{
+		writer.writeBE(thr);
+	}
+
+	FileStream* stream = FileStream::createFile(path);
+	stream->writeData(writer.getResult().data(), writer.getResult().size_bytes());
+	delete stream;
+	LoadEmulatorState(path);
+}
+
+void LoadEmulatorState(std::string path)
+{
+	CafeSystem::PauseTitle();
+
+	auto data = FileStream::LoadIntoMemory(path);
+	assert(data.has_value());
+	MemStreamReader reader(data->data(), data->size());
+
+	// memory
+	memory_Deserialize(reader);
+	// gpu
+	reader.readData(LatteGPUState.contextRegister, 65536);
+	reader.readData(LatteGPUState.contextRegisterShadowAddr, 65536);
+	reader.readData(LatteGPUState.sharedArea, sizeof(gx2GPUSharedArea_t));
+	// cpu
+	auto threads = coreinit::GetAllThreads();
+	for (auto& thr : threads)
+	{
+		bool notnull = reader.readBE<bool>();
+		if (notnull)
+		{
+			if (!thr)
+			{
+				thr = new OSThread_t;
+			}
+			reader.readData(thr, sizeof(OSThread_t));
+		}
+	}
+	for (size_t i = 0; i < 256; i++)
+	{
+		activeThread[i] = reader.readBE<uint32>();
+	}
+
+	CafeSystem::ResumeTitle();
+}
+
 int mainEmulatorHLE()
 {
 	LatteOverlay_init();

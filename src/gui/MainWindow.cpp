@@ -71,6 +71,8 @@ enum
 	// file
 	MAINFRAME_MENU_ID_FILE_LOAD = 20100,
 	MAINFRAME_MENU_ID_FILE_INSTALL_UPDATE,
+	MAINFRAME_MENU_ID_FILE_SAVESTATE,
+	MAINFRAME_MENU_ID_FILE_LOADSTATE,
 	MAINFRAME_MENU_ID_FILE_EXIT,
 	MAINFRAME_MENU_ID_FILE_END_EMULATION,
 	MAINFRAME_MENU_ID_FILE_RECENT_0,
@@ -162,6 +164,8 @@ EVT_MENU(MAINFRAME_MENU_ID_FILE_LOAD, MainWindow::OnFileMenu)
 EVT_MENU(MAINFRAME_MENU_ID_FILE_INSTALL_UPDATE, MainWindow::OnInstallUpdate)
 EVT_MENU(MAINFRAME_MENU_ID_FILE_EXIT, MainWindow::OnFileExit)
 EVT_MENU(MAINFRAME_MENU_ID_FILE_END_EMULATION, MainWindow::OnFileMenu)
+EVT_MENU(MAINFRAME_MENU_ID_FILE_SAVESTATE, MainWindow::OnFileMenu)
+EVT_MENU(MAINFRAME_MENU_ID_FILE_LOADSTATE, MainWindow::OnFileMenu)
 EVT_MENU_RANGE(MAINFRAME_MENU_ID_FILE_RECENT_0 + 0, MAINFRAME_MENU_ID_FILE_RECENT_LAST, MainWindow::OnFileMenu)
 // options -> region menu
 EVT_MENU_RANGE(MAINFRAME_MENU_ID_OPTIONS_ACCOUNT_1, MAINFRAME_MENU_ID_OPTIONS_ACCOUNT_12, MainWindow::OnAccountSelect)
@@ -569,7 +573,8 @@ void MainWindow::OnLaunchFromFile(wxLaunchGameEvent& event)
 		return;
 	FileLoad(event.GetPath().generic_wstring(), event.GetInitiatedBy());
 }
-
+void SaveEmulatorState(std::string path);
+void LoadEmulatorState(std::string path);
 void MainWindow::OnFileMenu(wxCommandEvent& event)
 {
 	const auto menuId = event.GetId();
@@ -595,6 +600,14 @@ void MainWindow::OnFileMenu(wxCommandEvent& event)
 
 		const wxString wxStrFilePath = openFileDialog.GetPath();	
 		FileLoad(wxStrFilePath.wc_str(), wxLaunchGameEvent::INITIATED_BY::MENU);
+	}
+	else if (menuId == MAINFRAME_MENU_ID_FILE_SAVESTATE)
+	{
+		SaveEmulatorState("state.bin");
+	}
+	else if (menuId == MAINFRAME_MENU_ID_FILE_LOADSTATE)
+	{
+		LoadEmulatorState("state.bin");
 	}
 	else if (menuId >= MAINFRAME_MENU_ID_FILE_RECENT_0 && menuId <= MAINFRAME_MENU_ID_FILE_RECENT_LAST)
 	{
@@ -1948,11 +1961,15 @@ void MainWindow::RecreateMenu()
 	m_menuBar = new wxMenuBar;
 	// file submenu
 	m_fileMenu = new wxMenu;
+	m_saveState = m_fileMenu->Append(MAINFRAME_MENU_ID_FILE_SAVESTATE, _("&Save state"));
+	m_loadState = m_fileMenu->Append(MAINFRAME_MENU_ID_FILE_LOADSTATE, _("&Load state"));
 
 	if (!m_game_launched)
 	{
 		m_loadMenuItem = m_fileMenu->Append(MAINFRAME_MENU_ID_FILE_LOAD, _("&Load..."));
 		m_installUpdateMenuItem = m_fileMenu->Append(MAINFRAME_MENU_ID_FILE_INSTALL_UPDATE, _("&Install game title, update or DLC..."));
+
+		
 
 		sint32 recentFileIndex = 0;
 		m_fileMenuSeparator0 = nullptr;

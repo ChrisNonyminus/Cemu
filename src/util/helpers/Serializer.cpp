@@ -134,6 +134,20 @@ void MemStreamWriter::writeBE<uint8>(const uint8& v)
 	m_buffer.emplace_back(v);
 }
 
+template<>
+void MemStreamWriter::writeBE<bool>(const bool& v)
+{
+	writeData(&v, sizeof(bool));
+}
+
+template<>
+bool MemStreamReader::readBE<bool>()
+{
+	bool v{false};
+	readData(&v, sizeof(bool));
+	return v;
+}
+
 
 template<>
 void MemStreamWriter::writeBE<std::string>(const std::string& v)

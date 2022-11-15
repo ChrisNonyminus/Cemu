@@ -202,6 +202,8 @@ private:
 	wxMenuItem* m_fileMenuSeparator1;
 	wxMenuItem* m_loadMenuItem;
 	wxMenuItem* m_installUpdateMenuItem;
+	wxMenuItem* m_saveState;
+	wxMenuItem* m_loadState;
 	wxMenuItem* m_exitMenuItem;
 
 	// options
