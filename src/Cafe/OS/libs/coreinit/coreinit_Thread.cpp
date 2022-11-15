@@ -220,6 +220,8 @@ namespace coreinit
 			if (thr != 0)
 			{
 				OSResumeThread(ptr);
+				if (s_threadToFiber.find(ptr) == s_threadToFiber.end())
+					__OSCreateHostThread(ptr);
 			}
 		}
 		if (__currentCoreThread[0])
