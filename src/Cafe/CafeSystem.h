@@ -30,7 +30,7 @@ namespace CafeSystem
 	void ShutdownTitle();
 
 	void PauseTitle();
-	void ResumeTitle();
+	void ResumeTitle(bool* runningThreads = nullptr);
 
 	std::string GetMlcStoragePath(TitleId titleId);
 	void MlcStorageMountAllTitles();

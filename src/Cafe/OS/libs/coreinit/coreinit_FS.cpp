@@ -1562,6 +1562,16 @@ namespace coreinit
 		return 0; // no error
 	}
 
+	void FSSave(MemStreamWriter& s)
+	{
+		s.writeData(g_fsRegisteredClientBodies, sizeof(FSClientBody_t));
+	}
+
+	void FSRestore(MemStreamReader& s)
+	{
+		s.readData(g_fsRegisteredClientBodies, sizeof(FSClientBody_t));
+	}
+
 	void InitializeFS()
 	{
 		cafeExportRegister("coreinit", FSInit, LogType::File);

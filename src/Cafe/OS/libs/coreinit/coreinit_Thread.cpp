@@ -212,17 +212,28 @@ namespace coreinit
 
 	}
 
-	void ResumeAllThreads()
+	void ResumeAllThreads(bool* runningThreads)
 	{
+		int i = 0;
 		for (auto& thr : activeThread)
 		{
 			auto* ptr = (OSThread_t*)memory_getPointerFromVirtualOffset(thr);
 			if (thr != 0)
 			{
-				OSResumeThread(ptr);
-				if (s_threadToFiber.find(ptr) == s_threadToFiber.end())
-					__OSCreateHostThread(ptr);
+				if (runningThreads && runningThreads[i])
+				{
+					if (s_threadToFiber.find(ptr) == s_threadToFiber.end())
+						__OSCreateHostThread(ptr);
+					OSResumeThread(ptr);
+				}
+				else if (!runningThreads)
+				{
+					if (s_threadToFiber.find(ptr) == s_threadToFiber.end())
+						__OSCreateHostThread(ptr);
+					OSResumeThread(ptr);
+				}
 			}
+			i++;
 		}
 		if (__currentCoreThread[0])
 			OSResumeThread(__currentCoreThread[0]);

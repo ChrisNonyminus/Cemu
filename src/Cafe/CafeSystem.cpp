@@ -788,7 +788,7 @@ namespace CafeSystem
 		sSystemRunning = false;
 	}
 
-	void ResumeTitle()
+	void ResumeTitle(bool* runningThreads)
 	{
 		if (sSystemRunning)
 			return;
@@ -797,7 +797,7 @@ namespace CafeSystem
 			coreinit::OSSchedulerBegin(3);
 		else
 			coreinit::OSSchedulerBegin(1);*/
-		coreinit::ResumeAllThreads();
+		coreinit::ResumeAllThreads(runningThreads);
 		//Latte_Start();
 		sSystemRunning = true;
 	}

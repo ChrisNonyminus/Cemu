@@ -248,11 +248,25 @@ void unitTests()
 }
 
 #include "Cafe/CafeSystem.h"
+#include "Cafe/OS/libs/coreinit/coreinit_FS.h"
 void LoadEmulatorState(std::string path);
 void SaveEmulatorState(std::string path)
 {
-	CafeSystem::PauseTitle();
+	cemuLog_log(LogType::Force, "[SAVESTATE] Saving state...");
 	MemStreamWriter writer(0);
+	//// get thread states
+	//for (size_t i = 0; i < 256; i++)
+	//{
+	//	// this is very hacky
+	//	auto* ptr = (OSThread_t*)memory_getPointerFromVirtualOffset(activeThread[i]);
+	//	if (activeThread[i] != 0 && ptr)
+	//	{
+	//		writer.writeBE<bool>(ptr->state == OSThread_t::THREAD_STATE::STATE_RUNNING);
+	//	}
+	//	else writer.writeBE<bool>(false);
+	//}
+	// pause game
+	CafeSystem::PauseTitle();
 	// memory
 	memory_Serialize(writer);
 	// gpu
@@ -271,21 +285,31 @@ void SaveEmulatorState(std::string path)
 	{
 		writer.writeBE(thr);
 	}
+	// fs
+	coreinit::FSSave(writer);
+	iosu::fsa::Save(writer);
 
 	FileStream* stream = FileStream::createFile(path);
 	stream->writeData(writer.getResult().data(), writer.getResult().size_bytes());
 	delete stream;
+	cemuLog_log(LogType::Force, "[SAVESTATE] Saved state to {}.", path);
 	LoadEmulatorState(path);
 }
 
 void LoadEmulatorState(std::string path)
 {
 	CafeSystem::PauseTitle();
+	cemuLog_log(LogType::Force, "[SAVESTATE] Loading state...", path);
 
 	auto data = FileStream::LoadIntoMemory(path);
 	assert(data.has_value());
 	MemStreamReader reader(data->data(), data->size());
-
+	// is thread supposed to be running?
+	/*bool isThreadRunning[256] = {};
+	for (int i = 0; i < 256; i++)
+	{
+		isThreadRunning[i] = reader.readBE<bool>();
+	}*/
 	// memory
 	memory_Deserialize(reader);
 	// gpu
@@ -310,8 +334,13 @@ void LoadEmulatorState(std::string path)
 	{
 		activeThread[i] = reader.readBE<uint32>();
 	}
+	// fs
+	coreinit::FSRestore(reader);
+	iosu::fsa::Restore(reader);
 
-	CafeSystem::ResumeTitle();
+	cemuLog_log(LogType::Force, "[SAVESTATE] Loaded state from {}.", path);
+
+	CafeSystem::ResumeTitle(/*isThreadRunning*/);
 }
 
 int mainEmulatorHLE()

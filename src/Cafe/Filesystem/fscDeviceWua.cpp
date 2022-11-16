@@ -5,6 +5,7 @@ class FSCDeviceWuaFileCtx : public FSCVirtualFile
 {
 	friend class fscDeviceWUAC;
 
+
 protected:
 	FSCDeviceWuaFileCtx(ZArchiveReader* archive, ZArchiveNodeHandle fstFileHandle, uint32 fscType)
 	{
@@ -15,6 +16,10 @@ protected:
 	};
 
 public:
+	void Save(MemStreamWriter& writer) override
+	{
+		throw std::exception("Not implemented");
+	}
 	sint32 fscGetType() override
 	{
 		return m_fscType;
